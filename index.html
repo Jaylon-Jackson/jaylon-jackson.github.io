@@ -146,6 +146,7 @@ nav{
 }
 .status-badge.active{color:#6ab89a;border:1px solid rgba(106,184,154,.35);background:rgba(106,184,154,.06)}
 .status-badge.archived{color:rgba(201,148,58,.4);border:1px solid rgba(201,148,58,.15);background:transparent}
+.status-badge.blog{color:#b07fd4;border:1px solid rgba(176,127,212,.35);background:rgba(176,127,212,.06)}
 .reading-link{
   font-family:"DM Mono",monospace;font-size:.55rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gold-dim);text-decoration:none;
@@ -204,6 +205,52 @@ footer p{font-family:"DM Mono",monospace;font-size:.58rem;color:rgba(201,148,58,
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
+/* ── Access Gate ── */
+#access-gate{
+  position:fixed;inset:0;z-index:99998;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease
+}
+#access-gate.fade-out{opacity:0;pointer-events:none}
+#gate-inner{
+  display:flex;flex-direction:column;align-items:center;
+  gap:1.2rem;padding:3rem 2rem;max-width:360px;width:100%;text-align:center
+}
+.gate-glyph{color:var(--gold);font-size:.75rem;letter-spacing:.5em;opacity:.5}
+.gate-title{
+  font-family:"Cinzel Decorative",serif;font-size:2rem;
+  color:var(--gold);letter-spacing:.2em
+}
+.gate-sub{
+  font-family:"DM Mono",monospace;font-size:.56rem;
+  letter-spacing:.38em;text-transform:uppercase;color:var(--gold-dim);margin-top:-.3rem
+}
+.gate-form{display:flex;flex-direction:column;gap:.8rem;width:100%;margin-top:.8rem}
+#gate-input{
+  background:rgba(201,148,58,.04);border:1px solid rgba(201,148,58,.2);
+  color:var(--bone);font-family:"DM Mono",monospace;font-size:.7rem;
+  letter-spacing:.12em;padding:.9rem 1rem;border-radius:2px;
+  text-align:center;outline:none;transition:border-color .2s;width:100%
+}
+#gate-input::placeholder{color:rgba(201,148,58,.28)}
+#gate-input:focus{border-color:rgba(201,148,58,.5)}
+#gate-btn{
+  background:transparent;border:1px solid rgba(201,148,58,.3);
+  color:var(--gold-dim);font-family:"DM Mono",monospace;font-size:.56rem;
+  letter-spacing:.28em;text-transform:uppercase;padding:.75rem 1.5rem;
+  border-radius:2px;cursor:pointer;transition:all .25s
+}
+#gate-btn:hover{border-color:var(--gold);color:var(--gold)}
+.gate-denied{
+  font-family:"DM Mono",monospace;font-size:.62rem;
+  color:rgba(180,70,50,.85);letter-spacing:.1em;line-height:1.9;
+  animation:fade-up .4s forwards
+}
+.gate-denied-sub{
+  font-family:"DM Mono",monospace;font-size:.52rem;
+  color:rgba(245,240,232,.25);letter-spacing:.08em;margin-top:.6rem;line-height:1.8
+}
+
 /* ── Mobile ── */
 @media(max-width:640px){
   nav{padding:1rem 1.4rem}
@@ -213,6 +260,20 @@ footer p{font-family:"DM Mono",monospace;font-size:.58rem;color:rgba(201,148,58,
 </style>
 </head>
 <body>
+
+<!-- ── Access Gate ── -->
+<div id="access-gate">
+  <div id="gate-inner">
+    <div class="gate-glyph">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <div class="gate-title">J A Y L O N</div>
+    <div class="gate-sub">Readers Only</div>
+    <div class="gate-form" id="gate-form">
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button id="gate-btn" type="button">Enter &rarr;</button>
+    </div>
+  </div>
+</div>
+
 <div class="starfield" id="starfield"></div>
 
 <nav>
@@ -260,6 +321,18 @@ footer p{font-family:"DM Mono",monospace;font-size:.58rem;color:rgba(201,148,58,
   <h2>Readings Directory</h2>
 
   <div class="readings-grid">
+
+    <!-- Fate & Commentary — Personal Blog -->
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Fate &amp; Commentary</div>
+        <div class="reading-meta">Personal Blog &nbsp;&middot;&nbsp; Week of April 6, 2026 &nbsp;&middot;&nbsp; Sibilla &middot; Citadel Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge blog">Blog</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/fate-and-commentary/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
 
     <!-- Week of April 6 2026 — Active -->
     <div class="reading-row">
@@ -410,6 +483,33 @@ footer p{font-family:"DM Mono",monospace;font-size:.58rem;color:rgba(201,148,58,
 </footer>
 
 <script>
+// Access Gate — set GATE_ACTIVE=true to enable next week
+(function(){
+  var GATE_ACTIVE=false;
+  var PASS='JReaderOnly_100!';
+  var gate=document.getElementById('access-gate');
+  if(!GATE_ACTIVE){gate.remove();return;}
+  var input=document.getElementById('gate-input');
+  var btn=document.getElementById('gate-btn');
+  var form=document.getElementById('gate-form');
+  if(sessionStorage.getItem('gate_ok')==='1'){gate.remove();return;}
+  function unlock(){
+    sessionStorage.setItem('gate_ok','1');
+    gate.classList.add('fade-out');
+    setTimeout(function(){gate.remove();},680);
+  }
+  function deny(){
+    form.innerHTML='<div class="gate-denied">This page isn&rsquo;t for you.</div><div class="gate-denied-sub">If you believe this is an error,<br>reach out to your reader directly.</div>';
+  }
+  btn.addEventListener('click',function(){
+    if(input.value===PASS){unlock();}else{deny();}
+  });
+  input.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){btn.click();}
+  });
+  setTimeout(function(){input.focus();},350);
+})();
+
 // Starfield
 const sf = document.getElementById('starfield');
 for(let i = 0; i < 80; i++){
