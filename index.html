@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jaylon &middot; Card Readings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e0c0a;--bone:#f5f0e8;--parchment:#ede5d4;
+  --gold:#c9943a;--gold-light:#e8c67a;--gold-dim:#8a6520;
+  --rust:#8b3a1a;--plum:#5c2d5e
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--bone);
+  font-family:"Cormorant Garamond",serif;font-size:18px;
+  line-height:1.7;overflow-x:hidden;min-height:100vh
+}
+body::before{
+  content:"";position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.25
+}
+.starfield{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;width:2px;height:2px;background:var(--gold-light);border-radius:50%;opacity:0;animation:twinkle var(--dur,4s) var(--delay,0s) infinite}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(1)}50%{opacity:var(--bright,.6);transform:scale(1.5)}}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:linear-gradient(to bottom,rgba(14,12,10,.96),transparent);
+  padding:1.2rem 2.5rem;display:flex;align-items:center;justify-content:space-between
+}
+.nav-logo{font-family:"Cinzel Decorative",serif;font-size:.85rem;color:var(--gold);letter-spacing:.2em;text-decoration:none}
+.nav-right{font-family:"DM Mono",monospace;font-size:.6rem;color:var(--gold-dim);letter-spacing:.18em;text-transform:uppercase}
+
+/* ── Hero ── */
+.hero{
+  position:relative;min-height:100vh;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;text-align:center;
+  padding:6rem 2rem 5rem;z-index:1
+}
+.hero-glow{
+  position:absolute;width:700px;height:700px;
+  background:radial-gradient(ellipse,rgba(201,148,58,.1) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+  animation:pulse-glow 7s ease-in-out infinite
+}
+@keyframes pulse-glow{
+  0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+}
+.hero-eyebrow{
+  font-family:"DM Mono",monospace;font-size:.62rem;letter-spacing:.4em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:2rem;
+  opacity:0;animation:fade-up 1s .3s forwards
+}
+.hero-name{
+  font-family:"Cinzel Decorative",serif;
+  font-size:clamp(3rem,10vw,6.5rem);font-weight:700;
+  color:var(--gold);line-height:1;margin-bottom:1.2rem;
+  opacity:0;animation:fade-up 1s .6s forwards;
+  text-shadow:0 0 80px rgba(201,148,58,.25)
+}
+.hero-sub{
+  font-size:clamp(.85rem,2vw,1rem);font-weight:300;font-style:italic;
+  color:rgba(245,240,232,.5);letter-spacing:.08em;
+  margin-bottom:1.5rem;opacity:0;animation:fade-up 1s .9s forwards
+}
+.hero-decks{
+  display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;
+  margin-bottom:4rem;opacity:0;animation:fade-up 1s 1.1s forwards
+}
+.deck-pill{
+  font-family:"DM Mono",monospace;font-size:.52rem;letter-spacing:.18em;
+  text-transform:uppercase;padding:.28rem .75rem;border-radius:2rem;
+  border:1px solid rgba(201,148,58,.25);color:var(--gold-dim)
+}
+.scroll-cue{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  opacity:0;animation:fade-up 1s 1.5s forwards
+}
+.scroll-cue span{font-family:"DM Mono",monospace;font-size:.5rem;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--gold-dim),transparent);animation:scroll-drop 2s ease-in-out infinite}
+@keyframes scroll-drop{
+  0%{transform:scaleY(0);transform-origin:top;opacity:1}
+  50%{transform:scaleY(1);transform-origin:top;opacity:1}
+  51%{transform:scaleY(1);transform-origin:bottom;opacity:1}
+  100%{transform:scaleY(0);transform-origin:bottom;opacity:0}
+}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Divider ── */
+.section-divider{
+  display:flex;align-items:center;gap:1rem;
+  max-width:860px;margin:0 auto 3.5rem;padding:0 2rem
+}
+.divider-line{flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(201,148,58,.25),transparent)}
+.divider-glyph{color:var(--gold);font-size:.65rem}
+
+/* ── Sections ── */
+.section{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 2rem 5rem}
+.section-eyebrow{
+  font-family:"DM Mono",monospace;font-size:.58rem;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--gold-dim);margin-bottom:2rem
+}
+.section h2{
+  font-family:"Cinzel Decorative",serif;font-size:1rem;color:var(--gold);
+  letter-spacing:.14em;margin-bottom:1.6rem
+}
+
+/* ── About ── */
+.about-text p{
+  font-size:.97rem;color:rgba(245,240,232,.75);line-height:1.95;margin-bottom:1rem
+}
+.about-text p:last-child{margin-bottom:0}
+
+/* ── Readings directory ── */
+.readings-grid{display:flex;flex-direction:column;gap:1px;margin-top:.5rem}
+.reading-row{
+  display:grid;grid-template-columns:1fr auto;
+  align-items:center;gap:1.5rem;
+  padding:1.2rem 0;
+  border-bottom:1px solid rgba(201,148,58,.07);
+  transition:background .2s
+}
+.reading-row:last-child{border-bottom:none}
+.reading-row:hover{background:rgba(201,148,58,.025)}
+.reading-client{
+  font-family:"Cinzel Decorative",serif;font-size:.85rem;
+  color:var(--bone);letter-spacing:.08em;margin-bottom:.25rem
+}
+.reading-meta{
+  font-family:"DM Mono",monospace;font-size:.55rem;
+  color:var(--gold-dim);letter-spacing:.14em;text-transform:uppercase
+}
+.reading-right{display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.status-badge{
+  font-family:"DM Mono",monospace;font-size:.5rem;letter-spacing:.15em;
+  text-transform:uppercase;padding:.22rem .65rem;border-radius:2rem;
+  white-space:nowrap
+}
+.status-badge.active{color:#6ab89a;border:1px solid rgba(106,184,154,.35);background:rgba(106,184,154,.06)}
+.status-badge.archived{color:rgba(201,148,58,.4);border:1px solid rgba(201,148,58,.15);background:transparent}
+.reading-link{
+  font-family:"DM Mono",monospace;font-size:.55rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold-dim);text-decoration:none;
+  border:1px solid rgba(201,148,58,.2);padding:.28rem .7rem;border-radius:2px;
+  transition:all .3s;white-space:nowrap
+}
+.reading-link:hover{color:var(--gold);border-color:rgba(201,148,58,.5)}
+.reading-link.locked{
+  color:rgba(201,148,58,.25);border-color:rgba(201,148,58,.1);
+  pointer-events:none;cursor:default
+}
+
+/* ── Structure / convention block ── */
+.convention-block{
+  background:linear-gradient(135deg,rgba(201,148,58,.05),rgba(92,45,94,.04));
+  border:1px solid rgba(201,148,58,.15);border-radius:4px;
+  padding:2.4rem;position:relative;overflow:hidden;margin-top:.5rem
+}
+.convention-block::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--plum),var(--gold),var(--rust))
+}
+.convention-section{margin-bottom:2rem}
+.convention-section:last-child{margin-bottom:0}
+.convention-label{
+  font-family:"DM Mono",monospace;font-size:.54rem;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--gold-dim);margin-bottom:1rem
+}
+.convention-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.convention-list li{
+  font-family:"DM Mono",monospace;font-size:.62rem;
+  color:rgba(245,240,232,.65);letter-spacing:.06em;line-height:1.7;
+  padding-left:1.2rem;position:relative
+}
+.convention-list li::before{content:"◈";position:absolute;left:0;color:rgba(201,148,58,.4);font-size:.5rem;top:.15rem}
+.convention-list li strong{color:rgba(245,240,232,.88);font-weight:500}
+.convention-list li em{color:var(--gold-dim);font-style:normal}
+.file-tree{
+  font-family:"DM Mono",monospace;font-size:.6rem;
+  color:rgba(245,240,232,.55);line-height:2;letter-spacing:.04em;
+  border-left:2px solid rgba(201,148,58,.15);padding-left:1.2rem;margin-top:.8rem
+}
+.file-tree .tree-dir{color:var(--gold-dim)}
+.file-tree .tree-note{color:rgba(201,148,58,.35);font-size:.53rem}
+
+/* ── Footer ── */
+footer{
+  position:relative;z-index:1;text-align:center;
+  padding:3.5rem 2rem 3rem;
+  border-top:1px solid rgba(201,148,58,.08);margin-top:1rem
+}
+.footer-logo{font-family:"Cinzel Decorative",serif;font-size:1.1rem;color:var(--gold);margin-bottom:.5rem}
+footer p{font-family:"DM Mono",monospace;font-size:.58rem;color:rgba(201,148,58,.25);letter-spacing:.2em}
+
+/* ── Reveal ── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  nav{padding:1rem 1.4rem}
+  .reading-row{grid-template-columns:1fr;gap:.7rem}
+  .reading-right{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="starfield" id="starfield"></div>
+
+<nav>
+  <a href="#" class="nav-logo">J A Y L O N</a>
+  <span class="nav-right">Card Readings</span>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-eyebrow">Card Readings &nbsp;&middot;&nbsp; Prepared with Intention</p>
+  <h1 class="hero-name">Jaylon</h1>
+  <p class="hero-sub">Sibilla &nbsp;&middot;&nbsp; Kipper &nbsp;&middot;&nbsp; Tarot &nbsp;&middot;&nbsp; Oracle</p>
+  <div class="hero-decks">
+    <span class="deck-pill">Week Ahead</span>
+    <span class="deck-pill">Monthly</span>
+    <span class="deck-pill">Soul Portrait</span>
+    <span class="deck-pill">Annual</span>
+  </div>
+  <div class="scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── Divider ── -->
+<div class="section-divider reveal"><div class="divider-line"></div><div class="divider-glyph">✦</div><div class="divider-line"></div></div>
+
+<!-- ── About ── -->
+<section class="section reveal" id="about">
+  <p class="section-eyebrow">The Reader</p>
+  <h2>About These Readings</h2>
+  <div class="about-text">
+    <p>I read with multiple decks because each one shows a different layer of what&rsquo;s happening. The Sibilla maps events and people with a directness that other systems avoid. Kipper tracks movement &mdash; who&rsquo;s acting, who&rsquo;s nearby, what&rsquo;s coming toward you. Tarot speaks to the inner experience. Oracle names the archetypes and energies operating beneath everything else.</p>
+    <p>I walk you through the reading rather than handing you a list. Every card gets context, every position gets its lens explained, and the synthesis at the end ties the whole picture together. The goal is that you leave understanding not just what the cards said, but how to think about what they&rsquo;re showing you.</p>
+    <p>Readings are delivered as private, mobile-optimized pages &mdash; built to be read at your own pace, saved as a PDF, and returned to whenever the week asks you to check back in.</p>
+  </div>
+</section>
+
+<div class="section-divider reveal"><div class="divider-line"></div><div class="divider-glyph">✦</div><div class="divider-line"></div></div>
+
+<!-- ── Active Readings ── -->
+<section class="section reveal" id="readings">
+  <p class="section-eyebrow">Current &amp; Archived</p>
+  <h2>Readings Directory</h2>
+
+  <div class="readings-grid">
+
+    <!-- Week of April 6 2026 — Active -->
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Armani</div>
+        <div class="reading-meta">Week Ahead &nbsp;&middot;&nbsp; April 6&ndash;12, 2026 &nbsp;&middot;&nbsp; Sibilla &middot; Citadel Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge active">Active</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/Armani-Week-Ahead-April-6-2026/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
+
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Natalie</div>
+        <div class="reading-meta">Week Ahead &nbsp;&middot;&nbsp; April 6&ndash;12, 2026 &nbsp;&middot;&nbsp; Sibilla &middot; Citadel Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge active">Active</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/Natalie-Citadel-Readings/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
+
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Naomi</div>
+        <div class="reading-meta">Week Ahead &nbsp;&middot;&nbsp; April 6&ndash;12, 2026 &nbsp;&middot;&nbsp; Sibilla &middot; Citadel Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge active">Active</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/Naomi-Citadel-Readings/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Archived -->
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Tiffany</div>
+        <div class="reading-meta">Soul Portrait &nbsp;&middot;&nbsp; 2026 &nbsp;&middot;&nbsp; Tarot &middot; Kipper &middot; Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge archived">Archived</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/Tiffany-s-Soul-Portrait/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
+
+    <div class="reading-row">
+      <div>
+        <div class="reading-client">Dionna</div>
+        <div class="reading-meta">Soul Portrait &nbsp;&middot;&nbsp; 2026 &nbsp;&middot;&nbsp; Tarot &middot; Kipper &middot; Oracle</div>
+      </div>
+      <div class="reading-right">
+        <span class="status-badge archived">Archived</span>
+        <a class="reading-link" href="https://jaylon-jackson.github.io/Dionna-s-Soul-Portrait/" target="_blank">Open &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider reveal"><div class="divider-line"></div><div class="divider-glyph">✦</div><div class="divider-line"></div></div>
+
+<!-- ── Structure / Convention ── -->
+<section class="section reveal" id="structure">
+  <p class="section-eyebrow">How It&rsquo;s Organized</p>
+  <h2>Repo &amp; File Structure</h2>
+
+  <div class="convention-block">
+
+    <div class="convention-section">
+      <div class="convention-label">Repo Naming Convention</div>
+      <ul class="convention-list">
+        <li><strong>Ongoing clients</strong> &mdash; one repo that holds all readings:<br>
+          <em>[Name]-Readings</em> &rarr; e.g., Natalie-Citadel-Readings, Naomi-Citadel-Readings</li>
+        <li><strong>Week ahead readings</strong> &mdash; when a client gets their own dedicated repo per week:<br>
+          <em>[Name]-Week-Ahead-[Month]-[Day]-[Year]</em> &rarr; e.g., Armani-Week-Ahead-April-6-2026</li>
+        <li><strong>One-time readings</strong> &mdash; soul portraits, annual, special:<br>
+          <em>[Name]-[Type]-[Year]</em> &rarr; e.g., Tiffany-s-Soul-Portrait, Dionna-s-Soul-Portrait</li>
+        <li><strong>Main hub</strong> &mdash; this page, always at root:<br>
+          <em>jaylon-jackson.github.io</em></li>
+      </ul>
+    </div>
+
+    <div class="convention-section">
+      <div class="convention-label">Within an Ongoing Client Repo</div>
+      <div class="file-tree">
+        <span class="tree-dir">index.html</span> &nbsp;&nbsp;<span class="tree-note">&larr; always the current/latest reading</span><br>
+        <span class="tree-dir">deck-opener.jpg</span> &nbsp;&nbsp;<span class="tree-note">&larr; static deck photo, reused each week</span><br>
+        <span class="tree-dir">face-down.jpg</span> &nbsp;&nbsp;<span class="tree-note">&larr; current week spread (face down)</span><br>
+        <span class="tree-dir">face-up.jpg</span> &nbsp;&nbsp;<span class="tree-note">&larr; current week spread (revealed)</span><br>
+        <span class="tree-dir">archive/</span><br>
+        &nbsp;&nbsp;<span class="tree-dir">week-march-30-2026.html</span><br>
+        &nbsp;&nbsp;<span class="tree-dir">monthly-march-2026.html</span><br>
+        &nbsp;&nbsp;<span class="tree-dir">...</span>
+      </div>
+    </div>
+
+    <div class="convention-section">
+      <div class="convention-label">Weekly Workflow &mdash; New Reading Arrives</div>
+      <ul class="convention-list">
+        <li>Move current <strong>index.html</strong> &rarr; <em>archive/week-[date].html</em></li>
+        <li>Replace <strong>face-down.jpg</strong> and <strong>face-up.jpg</strong> with this week&rsquo;s spread photos</li>
+        <li>New <strong>index.html</strong> goes in root &mdash; client URL stays the same, no new link to send</li>
+        <li><strong>deck-opener.jpg</strong> stays permanently; never replaced unless decks change</li>
+        <li>Update this hub&rsquo;s directory with the new date range and status</li>
+      </ul>
+    </div>
+
+    <div class="convention-section">
+      <div class="convention-label">HTML Standards (Every Reading Page)</div>
+      <ul class="convention-list">
+        <li>Images as separate repo files &mdash; never base64 in HTML <em>(keeps HTML under 80 KB)</em></li>
+        <li>All special characters as HTML entities &mdash; <em>&amp;mdash; &amp;middot; &amp;rsquo;</em> etc. <em>(Safari-safe)</em></li>
+        <li>Countdown timer + save instructions near bottom of every reading</li>
+        <li>Expiry gate overlay &mdash; week readings expire Sunday midnight, monthly readings expire 40 days out</li>
+        <li>Print CSS hides timer/save section &mdash; PDF stays clean</li>
+        <li>Deck opener image: static base64 <em>(one-time embed, small, never changes)</em></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider reveal"><div class="divider-line"></div><div class="divider-glyph">✦</div><div class="divider-line"></div></div>
+
+<!-- ── Reading Types ── -->
+<section class="section reveal" id="types">
+  <p class="section-eyebrow">What&rsquo;s Available</p>
+  <h2>Reading Types</h2>
+
+  <div class="convention-block">
+    <div class="convention-section">
+      <ul class="convention-list">
+        <li><strong>Week Ahead</strong> &mdash; Seven positions covering theme, supports, friction, surprise, challenge, advice, and synthesis. Sibilla as the primary deck. Citadel Oracle for energetic context. Key influence card drawn from the bottom of the deck. Delivered Monday, expires Sunday midnight.</li>
+        <li><strong>Monthly</strong> &mdash; Full multi-deck reading using Sibilla, Kipper, Tarot, and Oracle. Covers the external terrain, internal experience, key energies, and a synthesis tying all four layers together. Delivered at the start of the month, expires 40 days out.</li>
+        <li><strong>Soul Portrait</strong> &mdash; A deep-dive one-time reading. No expiry. Delivered as a permanent page the recipient keeps.</li>
+        <li><strong>Annual</strong> &mdash; Full-year overview using multiple decks. One card or cluster per month, with an overarching theme card for the year. Delivered January or at the start of a personal new year.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="footer-logo">J A Y L O N</div>
+  <p>All readings prepared with intention &nbsp;&middot;&nbsp; jaylon-jackson.github.io</p>
+</footer>
+
+<script>
+// Starfield
+const sf = document.getElementById('starfield');
+for(let i = 0; i < 80; i++){
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = 'left:' + Math.random()*100 + '%;top:' + Math.random()*100 + '%;--dur:' + (3 + Math.random()*6) + 's;--delay:' + Math.random()*5 + 's;--bright:' + (0.3 + Math.random()*0.5);
+  sf.appendChild(s);
+}
+// Reveal on scroll
+const obs = new IntersectionObserver(entries => entries.forEach(e => {
+  if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+}), {threshold: 0, rootMargin: '0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
